@@ -112,7 +112,46 @@ TT_SO_SCHEDULES type standard table of TS_SO_SCHEDULES .
   end of TS_SO_CREATE_SIMPLE .
   types:
 TT_SO_CREATE_SIMPLE type standard table of TS_SO_CREATE_SIMPLE .
+  types:
+  begin of TS_SO_ALL,
+     DOC_NUMBER type C length 10,
+     ITM_NUMBER type C length 6,
+     MATERIAL type C length 18,
+     VEHICLEGUID type string,
+     SALES_ORG type C length 4,
+     DISTR_CHAN type C length 2,
+     DIVISION type C length 2,
+     SALES_GRP type C length 3,
+     REQ_DATE_H type string,
+     PURCH_NO type C length 20,
+     SOLDTOPARTY type C length 10,
+     SOLDTOPARTY_NAME type C length 35,
+     ENDCUSTOMER type string,
+     ENDCUSTOMER_NAME type string,
+     DOOR_VALUE type string,
+     DOOR_TEXT type string,
+     DRIVETRAIN_VALUE type string,
+     DRIVETRAIN_TEXT type string,
+     EMISSION_VALUE type string,
+     EMISSION_TEXT type string,
+     ENGINETYPE_VALUE type string,
+     ENGINETYPE_TEXT type string,
+     FAMILY_VALUE type string,
+     FAMILY_TEXT type string,
+     MODEL_YEAR type string,
+     OPTIONGROUP_VALUE type string,
+     OPTIONGROUP_TEXT type string,
+     SERIES_VALUE type string,
+     SERIES_TEXT type string,
+     TRANSMISSION_VALUE type string,
+     TRANSMISSION_TEXT type string,
+     TRIM_VALUE type string,
+     TRIM_TEXT type string,
+  end of TS_SO_ALL .
+  types:
+TT_SO_ALL type standard table of TS_SO_ALL .
 
+  constants GC_SO_ALL type /IWBEP/IF_MGW_MED_ODATA_TYPES=>TY_E_MED_ENTITY_NAME value 'SO_ALL' ##NO_TEXT.
   constants GC_SO_CONFIG_INST type /IWBEP/IF_MGW_MED_ODATA_TYPES=>TY_E_MED_ENTITY_NAME value 'SO_CONFIG_INST' ##NO_TEXT.
   constants GC_SO_CONFIG_REF type /IWBEP/IF_MGW_MED_ODATA_TYPES=>TY_E_MED_ENTITY_NAME value 'SO_CONFIG_REF' ##NO_TEXT.
   constants GC_SO_CONFIG_VALUE type /IWBEP/IF_MGW_MED_ODATA_TYPES=>TY_E_MED_ENTITY_NAME value 'SO_CONFIG_VALUE' ##NO_TEXT.
@@ -164,6 +203,9 @@ private section.
   methods DEFINE_SO_CREATE_SIMPLE
     raising
       /IWBEP/CX_MGW_MED_EXCEPTION .
+  methods DEFINE_SO_ALL
+    raising
+      /IWBEP/CX_MGW_MED_EXCEPTION .
   methods DEFINE_ASSOCIATIONS
     raising
       /IWBEP/CX_MGW_MED_EXCEPTION .
@@ -194,6 +236,7 @@ define_so_config_ref( ).
 define_so_config_value( ).
 define_so_schedules( ).
 define_so_create_simple( ).
+define_so_all( ).
 define_associations( ).
   endmethod.
 
@@ -261,8 +304,8 @@ lo_assoc_set = model->create_association_set( iv_association_set_name  = 'Header
                             iv_def_assoc_set    = abap_false ). "#EC NOTEXT
 * Referential constraint for association - ItemToConfig
 lo_ref_constraint = lo_association->create_ref_constraint( ).
-lo_ref_constraint->add_property( iv_principal_property = 'DocNumber'   iv_dependent_property = 'DocNumber' ). "#EC NOTEXT
 lo_ref_constraint->add_property( iv_principal_property = 'ItmNumber'   iv_dependent_property = 'Posex' ). "#EC NOTEXT
+lo_ref_constraint->add_property( iv_principal_property = 'DocNumber'   iv_dependent_property = 'DocNumber' ). "#EC NOTEXT
 lo_assoc_set = model->create_association_set( iv_association_set_name  = 'ItemToConfig'                         "#EC NOTEXT
                                               iv_left_entity_set_name  = 'SO_ITEM'              "#EC NOTEXT
                                               iv_right_entity_set_name = 'SO_CONFIG_REF'             "#EC NOTEXT
@@ -277,8 +320,8 @@ lo_assoc_set = model->create_association_set( iv_association_set_name  = 'ItemTo
                             iv_def_assoc_set    = abap_false ). "#EC NOTEXT
 * Referential constraint for association - ItemToPartner
 lo_ref_constraint = lo_association->create_ref_constraint( ).
-lo_ref_constraint->add_property( iv_principal_property = 'DocNumber'   iv_dependent_property = 'DocNumber' ). "#EC NOTEXT
 lo_ref_constraint->add_property( iv_principal_property = 'ItmNumber'   iv_dependent_property = 'ItmNumber' ). "#EC NOTEXT
+lo_ref_constraint->add_property( iv_principal_property = 'DocNumber'   iv_dependent_property = 'DocNumber' ). "#EC NOTEXT
 lo_assoc_set = model->create_association_set( iv_association_set_name  = 'ItemToPartner'                         "#EC NOTEXT
                                               iv_left_entity_set_name  = 'SO_ITEM'              "#EC NOTEXT
                                               iv_right_entity_set_name = 'SO_PARTNERS'             "#EC NOTEXT
@@ -293,8 +336,8 @@ lo_assoc_set = model->create_association_set( iv_association_set_name  = 'ItemTo
                             iv_def_assoc_set    = abap_false ). "#EC NOTEXT
 * Referential constraint for association - ItemToSchedule
 lo_ref_constraint = lo_association->create_ref_constraint( ).
-lo_ref_constraint->add_property( iv_principal_property = 'ItmNumber'   iv_dependent_property = 'ItmNumber' ). "#EC NOTEXT
 lo_ref_constraint->add_property( iv_principal_property = 'DocNumber'   iv_dependent_property = 'DocNumber' ). "#EC NOTEXT
+lo_ref_constraint->add_property( iv_principal_property = 'ItmNumber'   iv_dependent_property = 'ItmNumber' ). "#EC NOTEXT
 lo_assoc_set = model->create_association_set( iv_association_set_name  = 'ItemToSchedule'                         "#EC NOTEXT
                                               iv_left_entity_set_name  = 'SO_ITEM'              "#EC NOTEXT
                                               iv_right_entity_set_name = 'SO_SCHEDULES'             "#EC NOTEXT
@@ -309,13 +352,28 @@ lo_assoc_set = model->create_association_set( iv_association_set_name  = 'ItemTo
                             iv_def_assoc_set    = abap_false ). "#EC NOTEXT
 * Referential constraint for association - ConfigToValue
 lo_ref_constraint = lo_association->create_ref_constraint( ).
-lo_ref_constraint->add_property( iv_principal_property = 'DocNumber'   iv_dependent_property = 'DocNumber' ). "#EC NOTEXT
-lo_ref_constraint->add_property( iv_principal_property = 'RootId'   iv_dependent_property = 'InstId' ). "#EC NOTEXT
 lo_ref_constraint->add_property( iv_principal_property = 'ConfigId'   iv_dependent_property = 'ConfigId' ). "#EC NOTEXT
+lo_ref_constraint->add_property( iv_principal_property = 'RootId'   iv_dependent_property = 'InstId' ). "#EC NOTEXT
+lo_ref_constraint->add_property( iv_principal_property = 'DocNumber'   iv_dependent_property = 'DocNumber' ). "#EC NOTEXT
 lo_assoc_set = model->create_association_set( iv_association_set_name  = 'ConfigToValue'                         "#EC NOTEXT
                                               iv_left_entity_set_name  = 'SO_CONFIG_REF'              "#EC NOTEXT
                                               iv_right_entity_set_name = 'SO_CONFIG_VALUE'             "#EC NOTEXT
                                               iv_association_name      = 'ConfigToValue' ).                                 "#EC NOTEXT
+
+ lo_association = model->create_association(
+                            iv_association_name = 'SearchToSO_ALL' "#EC NOTEXT
+                            iv_left_type        = 'SO_SEARCH' "#EC NOTEXT
+                            iv_right_type       = 'SO_ALL' "#EC NOTEXT
+                            iv_right_card       = 'M' "#EC NOTEXT
+                            iv_left_card        = '1'  "#EC NOTEXT
+                            iv_def_assoc_set    = abap_false ). "#EC NOTEXT
+* Referential constraint for association - SearchToSO_ALL
+lo_ref_constraint = lo_association->create_ref_constraint( ).
+lo_ref_constraint->add_property( iv_principal_property = 'DocNumber'   iv_dependent_property = 'DocNumber' ). "#EC NOTEXT
+lo_assoc_set = model->create_association_set( iv_association_set_name  = 'SearchToSO_ALL'                         "#EC NOTEXT
+                                              iv_left_entity_set_name  = 'SO_SEARCH'              "#EC NOTEXT
+                                              iv_right_entity_set_name = 'SO_ALL'             "#EC NOTEXT
+                                              iv_association_name      = 'SearchToSO_ALL' ).                                 "#EC NOTEXT
 
 
 ***********************************************************************************************************************************
@@ -327,6 +385,9 @@ lo_entity_type = model->get_entity_type( iv_entity_name = 'SO_SEARCH' ). "#EC NO
 lo_nav_property = lo_entity_type->create_navigation_property( iv_property_name  = 'SearchToHeader' "#EC NOTEXT
                                                               iv_abap_fieldname = 'SEARCHTOHEADER' "#EC NOTEXT
                                                               iv_association_name = 'SearchToHeader' ). "#EC NOTEXT
+lo_nav_property = lo_entity_type->create_navigation_property( iv_property_name  = 'SearchToSO_ALL' "#EC NOTEXT
+                                                              iv_abap_fieldname = 'SEARCHTOSO_ALL' "#EC NOTEXT
+                                                              iv_association_name = 'SearchToSO_ALL' ). "#EC NOTEXT
 * Navigation Properties for entity - SO_HEADER
 lo_entity_type = model->get_entity_type( iv_entity_name = 'SO_HEADER' ). "#EC NOTEXT
 lo_nav_property = lo_entity_type->create_navigation_property( iv_property_name  = 'HeaderToItem' "#EC NOTEXT
@@ -491,7 +552,7 @@ lo_entity_set->set_updatable( abap_false ).
 lo_entity_set->set_deletable( abap_false ).
 
 lo_entity_set->set_pageable( abap_false ).
-lo_entity_set->set_addressable( abap_true ).
+lo_entity_set->set_addressable( abap_false ).
 lo_entity_set->set_has_ftxt_search( abap_false ).
 lo_entity_set->set_subscribable( abap_false ).
 lo_entity_set->set_filter_required( abap_false ).
@@ -590,7 +651,7 @@ lo_entity_set->set_updatable( abap_false ).
 lo_entity_set->set_deletable( abap_false ).
 
 lo_entity_set->set_pageable( abap_false ).
-lo_entity_set->set_addressable( abap_true ).
+lo_entity_set->set_addressable( abap_false ).
 lo_entity_set->set_has_ftxt_search( abap_false ).
 lo_entity_set->set_subscribable( abap_false ).
 lo_entity_set->set_filter_required( abap_false ).
@@ -726,7 +787,7 @@ lo_entity_set->set_updatable( abap_false ).
 lo_entity_set->set_deletable( abap_false ).
 
 lo_entity_set->set_pageable( abap_false ).
-lo_entity_set->set_addressable( abap_true ).
+lo_entity_set->set_addressable( abap_false ).
 lo_entity_set->set_has_ftxt_search( abap_false ).
 lo_entity_set->set_subscribable( abap_false ).
 lo_entity_set->set_filter_required( abap_false ).
@@ -761,6 +822,7 @@ lo_entity_type = model->create_entity_type( iv_entity_type_name = 'SO_CREATE_SIM
 ***********************************************************************************************************************************
 
 lo_property = lo_entity_type->create_property( iv_property_name = 'Vehicleguid' iv_abap_fieldname = 'VEHICLEGUID' ). "#EC NOTEXT
+lo_property->set_is_key( ).
 lo_property->set_type_edm_string( ).
 lo_property->set_creatable( abap_false ).
 lo_property->set_updatable( abap_false ).
@@ -843,7 +905,6 @@ lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
         iv_key      = 'unicode'
         iv_value    = 'false' ).
 lo_property = lo_entity_type->create_property( iv_property_name = 'DocNumber' iv_abap_fieldname = 'DOCNUMBER' ). "#EC NOTEXT
-lo_property->set_is_key( ).
 lo_property->set_type_edm_string( ).
 lo_property->set_maxlength( iv_max_length = 10 ). "#EC NOTEXT
 lo_property->set_creatable( abap_false ).
@@ -1059,7 +1120,7 @@ lo_entity_set->set_updatable( abap_false ).
 lo_entity_set->set_deletable( abap_false ).
 
 lo_entity_set->set_pageable( abap_false ).
-lo_entity_set->set_addressable( abap_true ).
+lo_entity_set->set_addressable( abap_false ).
 lo_entity_set->set_has_ftxt_search( abap_false ).
 lo_entity_set->set_subscribable( abap_false ).
 lo_entity_set->set_filter_required( abap_false ).
@@ -1169,7 +1230,7 @@ lo_entity_set->set_updatable( abap_false ).
 lo_entity_set->set_deletable( abap_false ).
 
 lo_entity_set->set_pageable( abap_false ).
-lo_entity_set->set_addressable( abap_true ).
+lo_entity_set->set_addressable( abap_false ).
 lo_entity_set->set_has_ftxt_search( abap_false ).
 lo_entity_set->set_subscribable( abap_false ).
 lo_entity_set->set_filter_required( abap_false ).
@@ -1281,7 +1342,7 @@ lo_entity_set->set_updatable( abap_false ).
 lo_entity_set->set_deletable( abap_false ).
 
 lo_entity_set->set_pageable( abap_false ).
-lo_entity_set->set_addressable( abap_true ).
+lo_entity_set->set_addressable( abap_false ).
 lo_entity_set->set_has_ftxt_search( abap_false ).
 lo_entity_set->set_subscribable( abap_false ).
 lo_entity_set->set_filter_required( abap_false ).
@@ -1464,7 +1525,7 @@ lo_entity_set->set_updatable( abap_false ).
 lo_entity_set->set_deletable( abap_false ).
 
 lo_entity_set->set_pageable( abap_false ).
-lo_entity_set->set_addressable( abap_true ).
+lo_entity_set->set_addressable( abap_false ).
 lo_entity_set->set_has_ftxt_search( abap_false ).
 lo_entity_set->set_subscribable( abap_false ).
 lo_entity_set->set_filter_required( abap_false ).
@@ -1578,7 +1639,7 @@ lo_entity_set->set_filter_required( abap_false ).
 *&---------------------------------------------------------------------*
 
 
-  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20230626224024'.                  "#EC NOTEXT
+  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20230627035641'.                  "#EC NOTEXT
   rv_last_modified = super->get_last_modified( ).
   IF rv_last_modified LT lc_gen_date_time.
     rv_last_modified = lc_gen_date_time.
@@ -1598,5 +1659,427 @@ lo_entity_set->set_filter_required( abap_false ).
 
 DATA:
      ls_text_element TYPE ts_text_element.                                 "#EC NEEDED
+  endmethod.
+
+
+  method DEFINE_SO_ALL.
+*&---------------------------------------------------------------------*
+*&           Generated code for the MODEL PROVIDER BASE CLASS         &*
+*&                                                                     &*
+*&  !!!NEVER MODIFY THIS CLASS. IN CASE YOU WANT TO CHANGE THE MODEL  &*
+*&        DO THIS IN THE MODEL PROVIDER SUBCLASS!!!                   &*
+*&                                                                     &*
+*&---------------------------------------------------------------------*
+
+
+  data:
+        lo_annotation     type ref to /iwbep/if_mgw_odata_annotation,                "#EC NEEDED
+        lo_entity_type    type ref to /iwbep/if_mgw_odata_entity_typ,                "#EC NEEDED
+        lo_complex_type   type ref to /iwbep/if_mgw_odata_cmplx_type,                "#EC NEEDED
+        lo_property       type ref to /iwbep/if_mgw_odata_property,                  "#EC NEEDED
+        lo_entity_set     type ref to /iwbep/if_mgw_odata_entity_set.                "#EC NEEDED
+
+***********************************************************************************************************************************
+*   ENTITY - SO_ALL
+***********************************************************************************************************************************
+
+lo_entity_type = model->create_entity_type( iv_entity_type_name = 'SO_ALL' iv_def_entity_set = abap_false ). "#EC NOTEXT
+
+***********************************************************************************************************************************
+*Properties
+***********************************************************************************************************************************
+
+lo_property = lo_entity_type->create_property( iv_property_name = 'DocNumber' iv_abap_fieldname = 'DOC_NUMBER' ). "#EC NOTEXT
+lo_property->set_is_key( ).
+lo_property->set_type_edm_string( ).
+lo_property->set_maxlength( iv_max_length = 10 ). "#EC NOTEXT
+lo_property->set_creatable( abap_true ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_true ).
+lo_property->set_filterable( abap_true ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'ItmNumber' iv_abap_fieldname = 'ITM_NUMBER' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_maxlength( iv_max_length = 6 ). "#EC NOTEXT
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Material' iv_abap_fieldname = 'MATERIAL' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_maxlength( iv_max_length = 18 ). "#EC NOTEXT
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'VehicleGuid' iv_abap_fieldname = 'VEHICLEGUID' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'SalesOrg' iv_abap_fieldname = 'SALES_ORG' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_maxlength( iv_max_length = 4 ). "#EC NOTEXT
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'DistrChan' iv_abap_fieldname = 'DISTR_CHAN' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_maxlength( iv_max_length = 2 ). "#EC NOTEXT
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Division' iv_abap_fieldname = 'DIVISION' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_maxlength( iv_max_length = 2 ). "#EC NOTEXT
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'SalesGrp' iv_abap_fieldname = 'SALES_GRP' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_maxlength( iv_max_length = 3 ). "#EC NOTEXT
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_true ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'ReqDateH' iv_abap_fieldname = 'REQ_DATE_H' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_true ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'CustReference' iv_abap_fieldname = 'PURCH_NO' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_maxlength( iv_max_length = 20 ). "#EC NOTEXT
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_true ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'SoldToParty' iv_abap_fieldname = 'SOLDTOPARTY' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_maxlength( iv_max_length = 10 ). "#EC NOTEXT
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'SoldToParty_Name' iv_abap_fieldname = 'SOLDTOPARTY_NAME' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_maxlength( iv_max_length = 35 ). "#EC NOTEXT
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'EndCustomer' iv_abap_fieldname = 'ENDCUSTOMER' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'EndCustomer_Name' iv_abap_fieldname = 'ENDCUSTOMER_NAME' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Door_Value' iv_abap_fieldname = 'DOOR_VALUE' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Door_Text' iv_abap_fieldname = 'DOOR_TEXT' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'DriveTrain_Value' iv_abap_fieldname = 'DRIVETRAIN_VALUE' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'DriveTrain_Text' iv_abap_fieldname = 'DRIVETRAIN_TEXT' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Emission_Value' iv_abap_fieldname = 'EMISSION_VALUE' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Emission_Text' iv_abap_fieldname = 'EMISSION_TEXT' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'EngineType_Value' iv_abap_fieldname = 'ENGINETYPE_VALUE' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'EngineType_Text' iv_abap_fieldname = 'ENGINETYPE_TEXT' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Family_Value' iv_abap_fieldname = 'FAMILY_VALUE' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Family_Text' iv_abap_fieldname = 'FAMILY_TEXT' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Model_Year' iv_abap_fieldname = 'MODEL_YEAR' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'OptionGroup_Value' iv_abap_fieldname = 'OPTIONGROUP_VALUE' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'OptionGroup_Text' iv_abap_fieldname = 'OPTIONGROUP_TEXT' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Series_Value' iv_abap_fieldname = 'SERIES_VALUE' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Series_Text' iv_abap_fieldname = 'SERIES_TEXT' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Transmission_Value' iv_abap_fieldname = 'TRANSMISSION_VALUE' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Transmission_Text' iv_abap_fieldname = 'TRANSMISSION_TEXT' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Trim_Value' iv_abap_fieldname = 'TRIM_VALUE' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Trim_Text' iv_abap_fieldname = 'TRIM_TEXT' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+
+lo_entity_type->bind_structure( iv_structure_name  = 'ZCL_ZHKMC_VMS_SALES_MPC=>TS_SO_ALL' ). "#EC NOTEXT
+
+
+***********************************************************************************************************************************
+*   ENTITY SETS
+***********************************************************************************************************************************
+lo_entity_set = lo_entity_type->create_entity_set( 'SO_ALL' ). "#EC NOTEXT
+
+lo_entity_set->set_creatable( abap_false ).
+lo_entity_set->set_updatable( abap_false ).
+lo_entity_set->set_deletable( abap_false ).
+
+lo_entity_set->set_pageable( abap_false ).
+lo_entity_set->set_addressable( abap_false ).
+lo_entity_set->set_has_ftxt_search( abap_false ).
+lo_entity_set->set_subscribable( abap_false ).
+lo_entity_set->set_filter_required( abap_false ).
   endmethod.
 ENDCLASS.

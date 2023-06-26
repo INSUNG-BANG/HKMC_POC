@@ -19,7 +19,7 @@ ENDCLASS.
 CLASS ZCL_ZHKMC_VMS_SALES_DPC_EXT IMPLEMENTATION.
 
 
-  method /IWBEP/IF_MGW_APPL_SRV_RUNTIME~GET_EXPANDED_ENTITYSET.
+  METHOD /iwbep/if_mgw_appl_srv_runtime~get_expanded_entityset.
 
     DATA : lt_deep_entity TYPE TABLE OF zcl_zhkmc_vms_sales_mpc_ext=>ty_deep_entity, "Deep Entity Type
            ls_deep_entity TYPE zcl_zhkmc_vms_sales_mpc_ext=>ty_deep_entity.         "Deep Entity Type
@@ -33,9 +33,9 @@ CLASS ZCL_ZHKMC_VMS_SALES_DPC_EXT IMPLEMENTATION.
           order_cfgs_cuins_out  TYPE TABLE OF bapicuinsm,
           order_cfgs_cuvals_out TYPE TABLE OF  bapicuvalm.
 
-    DATA : it_vbeln type table of sales_key,
-           s_vbeln    TYPE  range of vbak-vbeln,
-           wa_vbeln    like line of s_vbeln,
+    DATA : it_vbeln    TYPE TABLE OF sales_key,
+           s_vbeln     TYPE  RANGE OF vbak-vbeln,
+           wa_vbeln    LIKE LINE OF s_vbeln,
            s_matnr     TYPE RANGE OF mara-matnr,
            wa_matnr    LIKE LINE OF s_matnr,
            s_sp_kunnr  TYPE RANGE OF vbpa-kunnr,
@@ -86,18 +86,18 @@ CLASS ZCL_ZHKMC_VMS_SALES_DPC_EXT IMPLEMENTATION.
                   output = wa_sp_kunnr-low.
 **      .
               APPEND wa_sp_kunnr TO s_sp_kunnr.
-              when 'DOC_NUMBER'.
+            WHEN 'DOC_NUMBER'.
 
               wa_vbeln-option = 'EQ'.
               wa_vbeln-sign = 'I'.
 
-               CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+              CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
                 EXPORTING
                   input  = <fs_select_op>-low
                 IMPORTING
-                  output =  WA_VBELN-LOW.
+                  output = wa_vbeln-low.
 
-               append wa_vbeln to s_vbeln.
+              APPEND wa_vbeln TO s_vbeln.
 
           ENDCASE.
 
@@ -113,7 +113,7 @@ CLASS ZCL_ZHKMC_VMS_SALES_DPC_EXT IMPLEMENTATION.
                      AND p~kunnr IN s_sp_kunnr
                      AND p~parvw = 'AG' "SOLD-TO-PARTY
                      AND h~vkorg IN s_vkorg
-                     AND H~VBELN IN S_VBELN.
+                     AND h~vbeln IN s_vbeln.
 
 
 
@@ -244,7 +244,7 @@ CLASS ZCL_ZHKMC_VMS_SALES_DPC_EXT IMPLEMENTATION.
          AND   c~lkenz = @space.
       ENDIF.
 
-      select parvw, VTEXT FROM TPART INTO TABLE @data(IT_PARTNER_ROLE) where spras = 'E'.
+      SELECT parvw, vtext FROM tpart INTO TABLE @DATA(it_partner_role) WHERE spras = 'E'.
 
 
 
@@ -257,71 +257,210 @@ CLASS ZCL_ZHKMC_VMS_SALES_DPC_EXT IMPLEMENTATION.
       ls_deep_entity-searchtoheader = CORRESPONDING #( order_headers_out ).
 
       LOOP AT  ls_deep_entity-searchtoheader ASSIGNING FIELD-SYMBOL(<fs_header>).
-       <FS_HEADER>-headertoitem = VALUE #( FOR ls_item IN  order_items_out WHERE ( doc_number = <fs_header>-doc_number )
-                                         ( doc_number = ls_item-doc_number
-                                           itm_number = ls_item-itm_number
-                                           material = ls_item-material
-                                           plant = ls_item-plant
-                                           store_loc  = ls_item-stge_loc
-                                           itemtoschedule = VALUE #( FOR <fs_schedule> in order_schedules_out where ( doc_number =  ls_item-doc_number  and itm_number = ls_item-itm_number )
-                                           (    doc_number =  <fs_schedule>-doc_number
-                                                itm_number =  <fs_schedule>-itm_number
-                                                sched_line =  <fs_schedule>-sched_line
-                                                req_date   =  <fs_schedule>-req_date
-                                                req_qty    =  <fs_schedule>-req_qty
-                                                confir_qty =  <fs_schedule>-confir_qty
-                                                sales_unit =  <fs_schedule>-sales_unit
-                                                avail_con  =  <fs_schedule>-avail_con
-                                                tp_date =  <fs_schedule>-tp_date
-                                                load_date =  <fs_schedule>-load_date
-                                                                        gi_date =  <fs_schedule>-gi_date ) )
-                                         itemtopartner = value #( for <fs_partner> in order_partners_out where ( sd_doc =  ls_item-doc_number )
-                                                                  for <fs_address> in order_address_out where ( doc_number =  ls_item-doc_number and  address = <fs_partner>-address )
-                                                                  FOR <FS_PARTNER_ROLE_txt> in IT_PARTNER_ROLE where ( PARVW =  <fs_partner>-partn_role )
-                                                                    ( doc_number = <fs_partner>-sd_doc
-                                                                     partn_role = <FS_PARTNER_ROLE_txt>-vtext
-                                                                     partn_numb = <fs_partner>-customer
-                                                                     itm_number = <fs_partner>-itm_number
-                                                                     name = <fs_address>-name ) )
-                                         itemtoconfig = value #( for <fs_ref> in  order_cfgs_curefs_out where ( sd_doc = ls_item-doc_number and posex = ls_item-itm_number  )
-                                                                for <fs_inst> in  order_cfgs_cuins_out where ( sd_doc = ls_item-doc_number and inst_id = <fs_ref>-inst_id and config_id = <fs_ref>-config_id )
-                                                                  ( posex = <fs_ref>-posex
-                                                                   config_id = <fs_inst>-config_id
-                                                                   doc_number = <fs_inst>-sd_doc
-                                                                   root_id = <fs_inst>-inst_id
-                                                                   obj_type = <fs_inst>-obj_type
-                                                                   class_type = <fs_inst>-class_type
-                                                                   obj_key = <fs_inst>-obj_key
-                                                                   quantity = <fs_inst>-quantity
-                                                                   quantity_unit = <fs_inst>-quantity_unit
-                                                                   configtovalue = value #(  for <fs_value> in order_cfgs_cuvals_out where ( sd_doc = <fs_header>-doc_number and inst_id = <fs_inst>-inst_id and config_id =  <fs_inst>-config_id  )
-                                                                                             for <fs_char_text> in lt_char_text where ( atnam = <fs_value>-charc and atwrt = <fs_value>-value )
-                                                                                          ( doc_number =  <fs_value>-sd_doc
-                                                                                            config_id =  <fs_value>-config_id
-                                                                                            inst_id =  <fs_value>-inst_id
-                                                                                            charc =  <fs_value>-charc
-                                                                                            charc_txt =  <fs_char_text>-atbez
-                                                                                            value =  <fs_value>-value
-                                                                                            value_txt =  <fs_char_text>-atwtb ) )
+        <fs_header>-headertoitem = VALUE #( FOR ls_item IN  order_items_out WHERE ( doc_number = <fs_header>-doc_number )
+                                          ( doc_number = ls_item-doc_number
+                                            itm_number = ls_item-itm_number
+                                            material = ls_item-material
+                                            plant = ls_item-plant
+                                            store_loc  = ls_item-stge_loc
+                                            itemtoschedule = VALUE #( FOR <fs_schedule> IN order_schedules_out WHERE ( doc_number =  ls_item-doc_number  AND itm_number = ls_item-itm_number )
+                                            (    doc_number =  <fs_schedule>-doc_number
+                                                 itm_number =  <fs_schedule>-itm_number
+                                                 sched_line =  <fs_schedule>-sched_line
+                                                 req_date   =  <fs_schedule>-req_date
+                                                 req_qty    =  <fs_schedule>-req_qty
+                                                 confir_qty =  <fs_schedule>-confir_qty
+                                                 sales_unit =  <fs_schedule>-sales_unit
+                                                 avail_con  =  <fs_schedule>-avail_con
+                                                 tp_date =  <fs_schedule>-tp_date
+                                                 load_date =  <fs_schedule>-load_date
+                                                                         gi_date =  <fs_schedule>-gi_date ) )
+                                          itemtopartner = VALUE #( FOR <fs_partner> IN order_partners_out WHERE ( sd_doc =  ls_item-doc_number )
+                                                                   FOR <fs_address> IN order_address_out WHERE ( doc_number =  ls_item-doc_number AND  address = <fs_partner>-address )
+                                                                   FOR <fs_partner_role_txt> IN it_partner_role WHERE ( parvw =  <fs_partner>-partn_role )
+                                                                     ( doc_number = <fs_partner>-sd_doc
+                                                                      partn_role = <fs_partner_role_txt>-vtext
+                                                                      partn_numb = <fs_partner>-customer
+                                                                      itm_number = <fs_partner>-itm_number
+                                                                      name = <fs_address>-name ) )
+                                          itemtoconfig = VALUE #( FOR <fs_ref> IN  order_cfgs_curefs_out WHERE ( sd_doc = ls_item-doc_number AND posex = ls_item-itm_number  )
+                                                                 FOR <fs_inst> IN  order_cfgs_cuins_out WHERE ( sd_doc = ls_item-doc_number AND inst_id = <fs_ref>-inst_id AND config_id = <fs_ref>-config_id )
+                                                                   ( posex = <fs_ref>-posex
+                                                                    config_id = <fs_inst>-config_id
+                                                                    doc_number = <fs_inst>-sd_doc
+                                                                    root_id = <fs_inst>-inst_id
+                                                                    obj_type = <fs_inst>-obj_type
+                                                                    class_type = <fs_inst>-class_type
+                                                                    obj_key = <fs_inst>-obj_key
+                                                                    quantity = <fs_inst>-quantity
+                                                                    quantity_unit = <fs_inst>-quantity_unit
+                                                                    configtovalue = VALUE #(  FOR <fs_value> IN order_cfgs_cuvals_out WHERE ( sd_doc = <fs_header>-doc_number AND inst_id = <fs_inst>-inst_id AND config_id =  <fs_inst>-config_id  )
+                                                                                              FOR <fs_char_text> IN lt_char_text WHERE ( atnam = <fs_value>-charc AND atwrt = <fs_value>-value )
+                                                                                           ( doc_number =  <fs_value>-sd_doc
+                                                                                             config_id =  <fs_value>-config_id
+                                                                                             inst_id =  <fs_value>-inst_id
+                                                                                             charc =  <fs_value>-charc
+                                                                                             charc_txt =  <fs_char_text>-atbez
+                                                                                             value =  <fs_value>-value
+                                                                                             value_txt =  <fs_char_text>-atwtb ) )
 *                                                                    valcode =  <fs_value>-valcode ) )
-                )  ) ) ) .
+                 )  ) ) ) .
 *
+
+
+
       ENDLOOP.
 
-      APPEND ls_deep_entity TO lt_deep_entity.
-      CLEAR ls_deep_entity.
+      IF order_headers_out[] IS NOT INITIAL.
+        SELECT b~vbeln, a~vguid,a~endcu,c~name_first FROM vlccuorder AS b JOIN  vlcvehicle AS  a ON b~vguid = a~vguid
+                                                                          JOIN but000 AS c ON a~endcu = c~partner
+       INTO TABLE @DATA(it_vehicle) FOR ALL ENTRIES IN  @order_headers_out
+          WHERE b~vbeln = @order_headers_out-doc_number .
+      ENDIF.
+
+      DATA: wa_so_all TYPE zcl_zhkmc_vms_sales_mpc_ext=>ts_so_all,
+            it_so_all TYPE zcl_zhkmc_vms_sales_mpc_ext=>tt_so_all.
+
+      LOOP AT  order_headers_out ASSIGNING FIELD-SYMBOL(<ls_header>).
+        wa_so_all-doc_number =  <ls_header>-doc_number.
+        wa_so_all-sales_org = <ls_header>-sales_org.
+        wa_so_all-distr_chan = <ls_header>-distr_chan.
+        wa_so_all-division = <ls_header>-division.
+        wa_so_all-sales_grp =  <ls_header>-sales_grp.
+        wa_so_all-purch_no =  <ls_header>-purch_no.
+        wa_so_all-req_date_h =  <ls_header>-req_date_h.
+
+        LOOP AT it_vehicle ASSIGNING FIELD-SYMBOL(<fs_vehicle>) WHERE ( vbeln =  <ls_header>-doc_number ).
+          wa_so_all-endcustomer = <fs_vehicle>-endcu.
+          wa_so_all-endcustomer_name = <fs_vehicle>-name_first.
+           wa_so_all-vehicleguid =  <fs_vehicle>-VGUID.
+        ENDLOOP.
+
+
+        LOOP AT  order_items_out INTO DATA(fs_item) WHERE ( doc_number = <ls_header>-doc_number ).
+          wa_so_all-itm_number = fs_item-itm_number.
+          wa_so_all-material = fs_item-material.
+
+
+          LOOP AT  order_partners_out ASSIGNING FIELD-SYMBOL(<fs_partner2>) WHERE ( sd_doc =  fs_item-doc_number AND partn_role = 'AG' ).
+            LOOP AT  order_address_out ASSIGNING FIELD-SYMBOL(<fs_address2>) WHERE ( doc_number =  fs_item-doc_number AND  address = <fs_partner2>-address ).
+              wa_so_all-soldtoparty = <fs_partner2>-customer.
+              wa_so_all-soldtoparty_name = <fs_address2>-name.
+            ENDLOOP.
+          ENDLOOP.
+
+          LOOP AT order_cfgs_curefs_out ASSIGNING FIELD-SYMBOL(<fs_ref2>) WHERE ( sd_doc = fs_item-doc_number AND posex = fs_item-itm_number  ).
+            LOOP AT  order_cfgs_cuins_out ASSIGNING FIELD-SYMBOL(<fs_inst2>) WHERE ( sd_doc = fs_item-doc_number AND inst_id = <fs_ref2>-inst_id AND config_id = <fs_ref2>-config_id ).
+              LOOP AT order_cfgs_cuvals_out ASSIGNING FIELD-SYMBOL(<fs_value2>) WHERE ( sd_doc =  fs_item-doc_number AND inst_id = <fs_inst2>-inst_id AND config_id =  <fs_inst2>-config_id  ).
+                LOOP AT  lt_char_text ASSIGNING FIELD-SYMBOL(<fs_char_text2>) WHERE ( atnam = <fs_value2>-charc AND atwrt = <fs_value2>-value ).
+                  CASE <fs_value2>-charc.
+                    WHEN 'DOOR'.
+                      wa_so_all-door_value = <fs_value2>-value.
+                      wa_so_all-door_text =  <fs_char_text2>-atwtb.
+                    WHEN 'DRIVE_TRAIN'.
+                      wa_so_all-drivetrain_value = <fs_value2>-value.
+                      wa_so_all-drivetrain_text  = <fs_char_text2>-atwtb.
+                    WHEN 'EMISSION'.
+                      wa_so_all-emission_value                = <fs_value2>-value.
+                      wa_so_all-emission_text              = <fs_char_text2>-atwtb.
+                    WHEN 'ENGINE_TYPE'.
+                      wa_so_all-enginetype_value  = <fs_value2>-value.
+                      wa_so_all-enginetype_text   = <fs_char_text2>-atwtb.
+                    WHEN 'FAMILY'.
+                      wa_so_all-family_value = <fs_value2>-value.
+                      wa_so_all-family_text = <fs_char_text2>-atwtb.
+
+                    WHEN 'MODEL_YEAR'.
+                      wa_so_all-model_year =  <fs_value2>-value..
+
+                    WHEN 'OPTION_GROUP'.
+                      wa_so_all-optiongroup_value = <fs_value2>-value.
+                      wa_so_all-optiongroup_text = <fs_char_text2>-atwtb.
+
+                    WHEN 'SERIES'.
+                      wa_so_all-series_value   = <fs_value2>-value.
+                      wa_so_all-series_text   = <fs_char_text2>-atwtb.
+                    WHEN 'TRANSMISSION'.
+                      wa_so_all-transmission_value     = <fs_value2>-value.
+                      wa_so_all-transmission_text = <fs_char_text2>-atwtb.
+                    WHEN 'TRIM'.
+                      wa_so_all-trim_value =  <fs_value2>-value.
+                      wa_so_all-trim_text = <fs_char_text2>-atwtb.
+
+                  ENDCASE.
+                ENDLOOP.
+              ENDLOOP.
+            ENDLOOP.
+            ENDLOOP.
+
+
+          ENDLOOP.
+
+           APPEND wa_so_all TO IT_SO_ALL.
+
+           ENDLOOP.
+           ls_deep_entity-searchtoso_all = IT_SO_ALL[].
+
+*          ls_deep_entity-searchtoso_all = VALUE #( FOR <ls_header> IN order_headers_out
+*                                                   FOR ls_item IN order_items_out WHERE ( doc_number = <ls_header>-doc_number )
+*                                                   FOR <fs_ref> IN  order_cfgs_curefs_out WHERE ( sd_doc = ls_item-doc_number AND posex = ls_item-itm_number  )
+*                                                   FOR <fs_inst> IN  order_cfgs_cuins_out WHERE ( sd_doc = ls_item-doc_number AND inst_id = <fs_ref>-inst_id AND config_id = <fs_ref>-config_id )
+*                                                   FOR <fs_value> IN order_cfgs_cuvals_out WHERE ( sd_doc = <fs_header>-doc_number AND inst_id = <fs_inst>-inst_id AND config_id =  <fs_inst>-config_id  )
+*                                                   FOR <fs_char_text> IN lt_char_text WHERE ( atnam = <fs_value>-charc AND atwrt = <fs_value>-value )
+*                                                   FOR <fs_partner> IN order_partners_out WHERE ( sd_doc =  ls_item-doc_number AND partn_role = 'AG' )
+*                                                   FOR <fs_address> IN order_address_out WHERE ( doc_number =  ls_item-doc_number AND  address = <fs_partner>-address )
+**
+*                                                  ( doc_number =  <ls_header>-doc_number
+**                                                itm_number = ls_item-itm_number
+*                                                   sales_org = <ls_header>-sales_org
+*                                                   distr_chan = <ls_header>-distr_chan
+*                                                   division = <ls_header>-division
+*                                                   sales_grp =  <ls_header>-sales_grp
+*                                                   purch_no =  <ls_header>-purch_no
+*                                                   req_date_h =  <ls_header>-req_date_h
+*                                                   material = ls_item-material
+*                                                   soldtoparty = <fs_partner>-customer
+*                                                   soldtoparty_name = <fs_address>-name
+**                                               endcustomer = <fs_vehicle>-endcu
+**                                               endcustomer_name = <FS_VEHICLE>-name_first
+**                                               Door_Value
+**                                               Door_Text
+**                                               DriveTrain_Value
+**                                               DriveTrain_Text
+**                                               Emission_Value
+**                                               Emission_Text
+**                                               EngineType_Value
+**                                               EngineType_Text
+**                                               Family_Value
+**                                               Family_Text
+**                                               Model_Year
+**                                               OptionGroup_Value
+**                                               OptionGroup_Text
+**                                               Series_Value
+**                                               Series_Text
+**                                               Transmission_Value
+**                                               Transmission_Text
+**                                               Trim_Value
+**                                               Trim_Text
 
 
 
 
-      CALL METHOD me->/iwbep/if_mgw_conv_srv_runtime~copy_data_to_ref
-        EXPORTING
-          is_data = lt_deep_entity
-        CHANGING
-          cr_data = er_entityset.
-    ENDIF.
 
-  ENDMETHOD.
+          APPEND ls_deep_entity TO lt_deep_entity.
+          CLEAR ls_deep_entity.
+
+
+
+
+          CALL METHOD me->/iwbep/if_mgw_conv_srv_runtime~copy_data_to_ref
+            EXPORTING
+              is_data = lt_deep_entity
+            CHANGING
+              cr_data = er_entityset.
+        ENDIF.
+
+      ENDMETHOD.
 
 
   METHOD so_create_simple_create_entity.

@@ -50,6 +50,7 @@ types:
       SALESORG TYPE ts_so_search-SALESORG,
       Soldtoparty type ts_so_search-soldtoparty,
       SearchToHeader type table of ty_searchtoheader WITH DEFAULT KEY,
+      SearchToSO_ALL type table of TS_SO_ALL WITH DEFAULT KEY,
       end of ty_deep_entity.
 
 *types:
