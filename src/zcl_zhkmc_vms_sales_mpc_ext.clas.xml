@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_ZHKMC_VMS_VEHIC_01_DPC_EXT</CLSNAME>
+    <CLSNAME>ZCL_ZHKMC_VMS_SALES_MPC_EXT</CLSNAME>
     <LANGU>3</LANGU>
-    <DESCRIPT>Data Provider Secondary Class</DESCRIPT>
+    <DESCRIPT>ZCL_ZHKMC_VMS_SALES_MPC_EXT</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

@@ -6,7 +6,6 @@ class ZCL_ZHKMC_VMS_VEHICLE_MPC_EXT definition
 public section.
 
 
-
 TYPES begin of ty_config.
   INCLUDE TYPE ts_config_ref.
   types: ConfigToValue TYPE TABLE OF ts_config_values WITH DEFAULT KEY,
@@ -31,6 +30,7 @@ CLASS ZCL_ZHKMC_VMS_VEHICLE_MPC_EXT IMPLEMENTATION.
 
   method DEFINE.
 
+
     super->define( ).
 
    DATA:
@@ -47,7 +47,6 @@ CLASS ZCL_ZHKMC_VMS_VEHICLE_MPC_EXT IMPLEMENTATION.
 
  	 lo_entity_type = model->get_entity_type( iv_entity_name = 'VEHICLE_DATA' ). "#EC NOTEXT
    lo_entity_type->bind_structure( iv_structure_name  =  'ZCL_ZHKMC_VMS_VEHICLE_MPC_EXT=>TY_DEEP_ENTITY' )."#EC NOTEXT
-
 
   endmethod.
 ENDCLASS.

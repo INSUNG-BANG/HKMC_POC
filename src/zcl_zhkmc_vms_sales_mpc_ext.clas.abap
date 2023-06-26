@@ -1,9 +1,10 @@
-CLASS zcl_zhkmc_vms_so_01_mpc_ext DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_zhkmc_vms_so_01_mpc
-  CREATE PUBLIC .
+class ZCL_ZHKMC_VMS_SALES_MPC_EXT definition
+  public
+  inheriting from ZCL_ZHKMC_VMS_SALES_MPC
+  create public .
 
-  PUBLIC SECTION.
+public section.
+
 
 
     TYPES : BEGIN OF ty_configurations.
@@ -76,7 +77,7 @@ ENDCLASS.
 
 
 
-CLASS ZCL_ZHKMC_VMS_SO_01_MPC_EXT IMPLEMENTATION.
+CLASS ZCL_ZHKMC_VMS_SALES_MPC_EXT IMPLEMENTATION.
 
 
   method DEFINE.
@@ -95,7 +96,8 @@ CLASS ZCL_ZHKMC_VMS_SO_01_MPC_EXT IMPLEMENTATION.
 * ******************************************************************  *****************************************************************
 
  	 lo_entity_type = model->get_entity_type( iv_entity_name = 'SO_HEADER' ). "#EC NOTEXT
-   lo_entity_type->bind_structure( iv_structure_name  =  'ZCL_ZHKMC_VMS_SO_01_MPC_EXT=>TY_DEEP_ENTITY' )."#EC NOTEXT
+   lo_entity_type->bind_structure( iv_structure_name  =  'ZCL_ZHKMC_VMS_SALES_MPC_EXT=>TY_DEEP_ENTITY' )."#EC NOTEXT
+
 
   endmethod.
 ENDCLASS.

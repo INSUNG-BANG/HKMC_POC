@@ -7,7 +7,7 @@ public section.
 
   types:
   begin of TS_VEHICLE_DATA,
-     VEHICLEGUID type SYSUUID_X,
+     VEHICLEGUID type string,
      VEHICLEGUID32 type string,
      VEHICLENUMBER type C length 10,
      MATERIALNUMBER type C length 18,
@@ -15,6 +15,7 @@ public section.
      PLANT type C length 4,
      STORAGELOCATION type C length 4,
      INTERNALOBJECTNR type C length 18,
+     SALESORDER type string,
   end of TS_VEHICLE_DATA .
   types:
 TT_VEHICLE_DATA type standard table of TS_VEHICLE_DATA .
@@ -94,7 +95,7 @@ CLASS ZCL_ZHKMC_VMS_VEHICLE_MPC IMPLEMENTATION.
 *&                                                                     &*
 *&---------------------------------------------------------------------*
 
-model->set_schema_namespace( 'ZHKMC_VMS_VEHICLE_DATA_SRV' ).
+model->set_schema_namespace( 'ZHKMC_VMS_VEHICLE_SRV' ).
 
 define_vehicle_data( ).
 define_config_values( ).
@@ -128,10 +129,26 @@ lo_nav_property   type ref to /iwbep/if_mgw_odata_nav_prop.                     
 ***********************************************************************************************************************************
 
  lo_association = model->create_association(
+                            iv_association_name = 'ConfigToValue' "#EC NOTEXT
+                            iv_left_type        = 'CONFIG_REF' "#EC NOTEXT
+                            iv_right_type       = 'CONFIG_VALUES' "#EC NOTEXT
+                            iv_right_card       = 'M' "#EC NOTEXT
+                            iv_left_card        = '1'  "#EC NOTEXT
+                            iv_def_assoc_set    = abap_false ). "#EC NOTEXT
+* Referential constraint for association - ConfigToValue
+lo_ref_constraint = lo_association->create_ref_constraint( ).
+lo_ref_constraint->add_property( iv_principal_property = 'InstId'   iv_dependent_property = 'InstId' ). "#EC NOTEXT
+lo_ref_constraint->add_property( iv_principal_property = 'ConfigId'   iv_dependent_property = 'ConfigId' ). "#EC NOTEXT
+lo_assoc_set = model->create_association_set( iv_association_set_name  = 'ConfigToValue'                         "#EC NOTEXT
+                                              iv_left_entity_set_name  = 'CONFIG_REF'              "#EC NOTEXT
+                                              iv_right_entity_set_name = 'CONFIG_VALUES'             "#EC NOTEXT
+                                              iv_association_name      = 'ConfigToValue' ).                                 "#EC NOTEXT
+
+ lo_association = model->create_association(
                             iv_association_name = 'VehicleToConfig' "#EC NOTEXT
                             iv_left_type        = 'VEHICLE_DATA' "#EC NOTEXT
                             iv_right_type       = 'CONFIG_REF' "#EC NOTEXT
-                            iv_right_card       = '1' "#EC NOTEXT
+                            iv_right_card       = 'M' "#EC NOTEXT
                             iv_left_card        = '1'  "#EC NOTEXT
                             iv_def_assoc_set    = abap_false ). "#EC NOTEXT
 * Referential constraint for association - VehicleToConfig
@@ -141,22 +158,6 @@ lo_assoc_set = model->create_association_set( iv_association_set_name  = 'Vehicl
                                               iv_left_entity_set_name  = 'VEHICLE_DATA'              "#EC NOTEXT
                                               iv_right_entity_set_name = 'CONFIG_REF'             "#EC NOTEXT
                                               iv_association_name      = 'VehicleToConfig' ).                                 "#EC NOTEXT
-
- lo_association = model->create_association(
-                            iv_association_name = 'ConfigToValue' "#EC NOTEXT
-                            iv_left_type        = 'CONFIG_REF' "#EC NOTEXT
-                            iv_right_type       = 'CONFIG_VALUES' "#EC NOTEXT
-                            iv_right_card       = 'M' "#EC NOTEXT
-                            iv_left_card        = '1'  "#EC NOTEXT
-                            iv_def_assoc_set    = abap_false ). "#EC NOTEXT
-* Referential constraint for association - ConfigToValue
-lo_ref_constraint = lo_association->create_ref_constraint( ).
-lo_ref_constraint->add_property( iv_principal_property = 'ConfigId'   iv_dependent_property = 'ConfigId' ). "#EC NOTEXT
-lo_ref_constraint->add_property( iv_principal_property = 'InstId'   iv_dependent_property = 'InstId' ). "#EC NOTEXT
-lo_assoc_set = model->create_association_set( iv_association_set_name  = 'ConfigToValuesSet'                         "#EC NOTEXT
-                                              iv_left_entity_set_name  = 'CONFIG_REF'              "#EC NOTEXT
-                                              iv_right_entity_set_name = 'CONFIG_VALUES'             "#EC NOTEXT
-                                              iv_association_name      = 'ConfigToValue' ).                                 "#EC NOTEXT
 
 
 ***********************************************************************************************************************************
@@ -204,6 +205,7 @@ lo_entity_type = model->create_entity_type( iv_entity_type_name = 'CONFIG_REF' i
 ***********************************************************************************************************************************
 
 lo_property = lo_entity_type->create_property( iv_property_name = 'Vehicleidentifier' iv_abap_fieldname = 'VEHICLEIDENTIFIER' ). "#EC NOTEXT
+lo_property->set_is_key( ).
 lo_property->set_type_edm_string( ).
 lo_property->set_maxlength( iv_max_length = 35 ). "#EC NOTEXT
 lo_property->set_creatable( abap_false ).
@@ -255,7 +257,7 @@ lo_entity_set->set_updatable( abap_false ).
 lo_entity_set->set_deletable( abap_false ).
 
 lo_entity_set->set_pageable( abap_false ).
-lo_entity_set->set_addressable( abap_false ).
+lo_entity_set->set_addressable( abap_true ).
 lo_entity_set->set_has_ftxt_search( abap_false ).
 lo_entity_set->set_subscribable( abap_false ).
 lo_entity_set->set_filter_required( abap_false ).
@@ -377,7 +379,7 @@ lo_entity_set->set_updatable( abap_false ).
 lo_entity_set->set_deletable( abap_false ).
 
 lo_entity_set->set_pageable( abap_false ).
-lo_entity_set->set_addressable( abap_false ).
+lo_entity_set->set_addressable( abap_true ).
 lo_entity_set->set_has_ftxt_search( abap_false ).
 lo_entity_set->set_subscribable( abap_false ).
 lo_entity_set->set_filter_required( abap_false ).
@@ -412,7 +414,7 @@ lo_entity_type = model->create_entity_type( iv_entity_type_name = 'VEHICLE_DATA'
 ***********************************************************************************************************************************
 
 lo_property = lo_entity_type->create_property( iv_property_name = 'Vehicleguid' iv_abap_fieldname = 'VEHICLEGUID' ). "#EC NOTEXT
-lo_property->set_type_edm_guid( ).
+lo_property->set_type_edm_string( ).
 lo_property->set_creatable( abap_false ).
 lo_property->set_updatable( abap_false ).
 lo_property->set_sortable( abap_false ).
@@ -506,6 +508,17 @@ lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
       EXPORTING
         iv_key      = 'unicode'
         iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'SalesOrder' iv_abap_fieldname = 'SALESORDER' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
 
 lo_entity_type->bind_structure( iv_structure_name  = 'ZCL_ZHKMC_VMS_VEHICLE_MPC=>TS_VEHICLE_DATA' ). "#EC NOTEXT
 
@@ -520,7 +533,7 @@ lo_entity_set->set_updatable( abap_false ).
 lo_entity_set->set_deletable( abap_false ).
 
 lo_entity_set->set_pageable( abap_false ).
-lo_entity_set->set_addressable( abap_false ).
+lo_entity_set->set_addressable( abap_true ).
 lo_entity_set->set_has_ftxt_search( abap_false ).
 lo_entity_set->set_subscribable( abap_false ).
 lo_entity_set->set_filter_required( abap_false ).
@@ -537,7 +550,7 @@ lo_entity_set->set_filter_required( abap_false ).
 *&---------------------------------------------------------------------*
 
 
-  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20230623170418'.                  "#EC NOTEXT
+  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20230626220157'.                  "#EC NOTEXT
   rv_last_modified = super->get_last_modified( ).
   IF rv_last_modified LT lc_gen_date_time.
     rv_last_modified = lc_gen_date_time.
