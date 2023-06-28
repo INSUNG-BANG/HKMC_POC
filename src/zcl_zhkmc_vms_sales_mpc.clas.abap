@@ -117,7 +117,9 @@ TT_SO_CREATE_SIMPLE type standard table of TS_SO_CREATE_SIMPLE .
      DOC_NUMBER type C length 10,
      ITM_NUMBER type C length 6,
      MATERIAL type C length 18,
+     MATERIAL_TEXT type string,
      VEHICLEGUID type string,
+     VIN_NUMBER type string,
      SALES_ORG type C length 4,
      DISTR_CHAN type C length 2,
      DIVISION type C length 2,
@@ -1639,7 +1641,7 @@ lo_entity_set->set_filter_required( abap_false ).
 *&---------------------------------------------------------------------*
 
 
-  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20230627035641'.                  "#EC NOTEXT
+  CONSTANTS: lc_gen_date_time TYPE timestamp VALUE '20230628192556'.                  "#EC NOTEXT
   rv_last_modified = super->get_last_modified( ).
   IF rv_last_modified LT lc_gen_date_time.
     rv_last_modified = lc_gen_date_time.
@@ -1726,7 +1728,29 @@ lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
       EXPORTING
         iv_key      = 'unicode'
         iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'MaterialText' iv_abap_fieldname = 'MATERIAL_TEXT' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
 lo_property = lo_entity_type->create_property( iv_property_name = 'VehicleGuid' iv_abap_fieldname = 'VEHICLEGUID' ). "#EC NOTEXT
+lo_property->set_type_edm_string( ).
+lo_property->set_creatable( abap_false ).
+lo_property->set_updatable( abap_false ).
+lo_property->set_sortable( abap_false ).
+lo_property->set_nullable( abap_false ).
+lo_property->set_filterable( abap_false ).
+lo_property->/iwbep/if_mgw_odata_annotatabl~create_annotation( 'sap' )->add(
+      EXPORTING
+        iv_key      = 'unicode'
+        iv_value    = 'false' ).
+lo_property = lo_entity_type->create_property( iv_property_name = 'Vehiclenumber' iv_abap_fieldname = 'VIN_NUMBER' ). "#EC NOTEXT
 lo_property->set_type_edm_string( ).
 lo_property->set_creatable( abap_false ).
 lo_property->set_updatable( abap_false ).

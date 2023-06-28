@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_SICF" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <URL>/sap/opu/odata/sap/S50100000001906/</URL>
+   <ICFSERVICE>
+    <ICF_NAME>S50100000001906</ICF_NAME>
+    <ORIG_NAME>S50100000001906</ORIG_NAME>
+    <ICFALTNME>ZHKMC_VMS_SEARCH_HELP_SRV</ICFALTNME>
+   </ICFSERVICE>
+   <ICFHANDLER_TABLE>
+    <ICFHANDLER>
+     <ICF_NAME>S50100000001906</ICF_NAME>
+     <ICFORDER>01</ICFORDER>
+     <ICFTYP>A</ICFTYP>
+     <ICFHANDLER>/IWFND/CL_SODATA_HTTP_HANDLER</ICFHANDLER>
+    </ICFHANDLER>
+   </ICFHANDLER_TABLE>
+  </asx:values>
+ </asx:abap>
+</abapGit>

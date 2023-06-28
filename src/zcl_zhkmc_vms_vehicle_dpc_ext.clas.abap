@@ -108,7 +108,7 @@ CLASS ZCL_ZHKMC_VMS_VEHICLE_DPC_EXT IMPLEMENTATION.
 
       DATA(lt_filter_select_options) = io_tech_request_context->get_filter( )->get_filter_select_options( ).
 
-
+SY-LANGU = 'EN'. " 한글로그인인 경우 text가 안나오는 이슈로 추가
 
       additional_param = VALUE #( FOR <ls_filter> IN  lt_filter_select_options
 

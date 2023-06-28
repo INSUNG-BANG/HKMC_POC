@@ -169,6 +169,7 @@ CLASS ZCL_ZHKMC_VMS_SALES_DPC_EXT IMPLEMENTATION.
 *      ls_ord_view-credcard    = abap_true.
 *      ls_ord_view-incomp_log  = abap_true.
 
+sy-langu = 'EN'.
 
       CALL FUNCTION 'BAPISDORDER_GETDETAILEDLIST'
         EXPORTING
@@ -206,6 +207,8 @@ CLASS ZCL_ZHKMC_VMS_SALES_DPC_EXT IMPLEMENTATION.
 *         ORDER_CREDITCARDS_OUT =
 *         EXTENSIONOUT          =
         .
+
+
 
       IF lines( order_headers_out ) = 0.
         message = 'Corresponding Sales Orders not exist'.
@@ -312,7 +315,7 @@ CLASS ZCL_ZHKMC_VMS_SALES_DPC_EXT IMPLEMENTATION.
       ENDLOOP.
 
       IF order_headers_out[] IS NOT INITIAL.
-        SELECT b~vbeln, a~vguid,a~endcu,c~name_first FROM vlccuorder AS b JOIN  vlcvehicle AS  a ON b~vguid = a~vguid
+        SELECT b~vbeln, a~vguid,a~vhcle, a~endcu,c~name_first FROM vlccuorder AS b JOIN  vlcvehicle AS  a ON b~vguid = a~vguid
                                                                           JOIN but000 AS c ON a~endcu = c~partner
        INTO TABLE @DATA(it_vehicle) FOR ALL ENTRIES IN  @order_headers_out
           WHERE b~vbeln = @order_headers_out-doc_number .
@@ -334,12 +337,14 @@ CLASS ZCL_ZHKMC_VMS_SALES_DPC_EXT IMPLEMENTATION.
           wa_so_all-endcustomer = <fs_vehicle>-endcu.
           wa_so_all-endcustomer_name = <fs_vehicle>-name_first.
            wa_so_all-vehicleguid =  <fs_vehicle>-VGUID.
+           wa_so_all-vin_number = <fs_vehicle>-vhcle.
         ENDLOOP.
 
 
         LOOP AT  order_items_out INTO DATA(fs_item) WHERE ( doc_number = <ls_header>-doc_number ).
           wa_so_all-itm_number = fs_item-itm_number.
           wa_so_all-material = fs_item-material.
+          wa_so_all-material_text = fs_item-short_text.
 
 
           LOOP AT  order_partners_out ASSIGNING FIELD-SYMBOL(<fs_partner2>) WHERE ( sd_doc =  fs_item-doc_number AND partn_role = 'AG' ).
