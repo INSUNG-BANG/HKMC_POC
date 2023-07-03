@@ -4,7 +4,7 @@
   <asx:values>
    <VSEOCLASS>
     <CLSNAME>ZCL_ZHKMC_VMS_SEARCH_H_DPC</CLSNAME>
-    <LANGU>E</LANGU>
+    <LANGU>3</LANGU>
     <DESCRIPT>Data Provider Base Class</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
